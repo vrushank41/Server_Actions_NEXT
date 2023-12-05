@@ -1,10 +1,41 @@
-import Image from "next/image";
+"use client";
 
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
+import { fetchAnime } from "@/app/action";
+import { AnimeCardData } from "./AnimeCard";
+
+let page = 2;
 function LoadMore() {
+
+  const [data, setData] = useState<AnimeCardData[]>([]);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetchAnime(page);
+      setData([...data,...response]);
+      page++;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView) {
+      fetchData();
+    }
+  }, [inView]);
+
   return (
     <>
+      <section className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-10">
+        {data}
+      </section>
       <section className="flex justify-center items-center w-full">
-        <div>
+        <div ref={ref}>
           <Image
             src="./spinner.svg"
             alt="spinner"
